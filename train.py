@@ -1,9 +1,18 @@
-import joblib
-from sklearn.datasets import fetch_olivetti_faces
+try:
+    import joblib
+except ImportError:
+    try:
+        from sklearn.externals import joblib
+    except ImportError:
+        raise ImportError("joblib is required; install it with 'pip install joblib'")
+
+try:
+    from sklearn.datasets import fetch_olivetti_faces
+except ImportError:
+    raise ImportError("scikit-learn is required; install it with 'pip install scikit-learn'")
+
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from quantized_tree import QuantizedDecisionTree
-import numpy as np
 
 def train_model():
     data = fetch_olivetti_faces()
@@ -16,20 +25,10 @@ def train_model():
     clf = DecisionTreeClassifier()
     clf.fit(X_train, y_train)
 
-    tree = clf.tree_
-
-    qtree = QuantizedDecisionTree(
-        feature=tree.feature,
-        threshold=tree.threshold,
-        children_left=tree.children_left,
-        children_right=tree.children_right,
-        value=tree.value
-    )
-
-    joblib.dump(qtree, "savedmodel_quantized.pth")
+    joblib.dump(clf, "savedmodel.pth")
     joblib.dump((X_test, y_test), "testset.pth")
 
-    print("Quantized model saved")
+    print("Model trained and saved as savedmodel.pth")
 
 if __name__ == "__main__":
     train_model()
